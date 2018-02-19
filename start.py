@@ -5,13 +5,13 @@ import json
 import requests
 
 PROFILES_URL = "https://api.mojang.com/profiles/minecraft"
-STREAM_WHITELIST_URL = "https://whitelist.twitchapps.com/list.php?id=warths5657829972d9b&format=json"
+STREAM_WHITELIST_URL = "https://whitelist.twitchapps.com/list.php?id=YOUR_ID_HERE&format=json"
 WHITELIST_FILE = "whitelist.json"
 ALL_OPS = True  # If True, Every whitelisted player will be OP. May be useful for Creative Servers.
 OPS_FILE = "ops.json"
 OPS_PERMISSION_LEVEL = 2
 OPS_BYPASSES_PLAYER_LIMIT = False
-LEVEL_4_OP_NAME = ["Warths", "Guerrierra", "EveryNight_MC"]
+LEVEL_4_OP_NAME = ["Player1", "Player2", "Player3"]
 
 def _post(url, body, head):
     response = requests.post(url, data=body, headers=head)
