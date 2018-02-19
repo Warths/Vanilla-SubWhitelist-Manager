@@ -7,7 +7,10 @@ import requests
 PROFILES_URL = "https://api.mojang.com/profiles/minecraft"
 STREAM_WHITELIST_URL = "https://whitelist.twitchapps.com/list.php?id=warths5657829972d9b&format=json"
 WHITELIST_FILE = "whitelist.json"
-
+ALL_OPS = True  # If True, Every whitelisted player will be OP. May be useful for Creative Servers.
+OPS_FILE = "ops.json"
+OPS_PERMISSION_LEVEL = 2
+OPS_BYPASSES_PLAYER_LIMIT = False
 
 def _post(url, body, head):
     response = requests.post(url, data=body, headers=head)
@@ -42,12 +45,28 @@ if __name__ == '__main__':
 
         list_player = find_profiles_by_names(names)
         whitelist = []
+        ops = []
+
         for player in list_player:
             full_uuid = format_uuid(player['id'])
             whitelist_block = {'uuid': full_uuid, 'name': player['name']}
             whitelist.append(whitelist_block)
-
+            ops_block = {'uuid': full_uuid,
+                         'name': player['name'],
+                         'level': OPS_PERMISSION_LEVEL,
+                         'bypassesPlayerLimit': OPS_BYPASSES_PLAYER_LIMIT}
+            ops.append(ops_block)
         whitelist = json.dumps(whitelist, indent=4)
+        ops = json.dumps(ops, indent=4)
+
+        if ALL_OPS:
+            try:
+                with open(OPS_FILE, 'w') as Opslist:
+                    Opslist.write(ops)
+                    Opslist.close()
+            except:
+                print("Error when writing OP list file")
+
         try:
             with open(WHITELIST_FILE, 'w') as Whitelist:
                 Whitelist.write(whitelist)
