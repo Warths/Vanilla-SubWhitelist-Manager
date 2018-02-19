@@ -11,6 +11,7 @@ ALL_OPS = True  # If True, Every whitelisted player will be OP. May be useful fo
 OPS_FILE = "ops.json"
 OPS_PERMISSION_LEVEL = 2
 OPS_BYPASSES_PLAYER_LIMIT = False
+LEVEL_4_OP_NAME = ["Warths", "Guerrierra", "EveryNight_MC"]
 
 def _post(url, body, head):
     response = requests.post(url, data=body, headers=head)
@@ -51,13 +52,27 @@ if __name__ == '__main__':
             full_uuid = format_uuid(player['id'])
             whitelist_block = {'uuid': full_uuid, 'name': player['name']}
             whitelist.append(whitelist_block)
-            ops_block = {'uuid': full_uuid,
-                         'name': player['name'],
-                         'level': OPS_PERMISSION_LEVEL,
-                         'bypassesPlayerLimit': OPS_BYPASSES_PLAYER_LIMIT}
-            ops.append(ops_block)
-        whitelist = json.dumps(whitelist, indent=4)
+            if ALL_OPS:
+                for operator in LEVEL_4_OP_NAME:
+                    print(operator + '==' + player['name'])
+                    if operator == player['name']:
+                        Player_Is_OP_LVL4 = True
+                        break
+                    else:
+                        Player_Is_OP_LVL4 = False
+                if Player_Is_OP_LVL4:
+                    ops_block = {'uuid': full_uuid,
+                                 'name': player['name'],
+                                 'level': 4,
+                                 'bypassesPlayerLimit': True}
+                else:
+                    ops_block = {'uuid': full_uuid,
+                                 'name': player['name'],
+                                 'level': OPS_PERMISSION_LEVEL,
+                                 'bypassesPlayerLimit': OPS_BYPASSES_PLAYER_LIMIT}
+                ops.append(ops_block)
         ops = json.dumps(ops, indent=4)
+        whitelist = json.dumps(whitelist, indent=4)
 
         if ALL_OPS:
             try:
