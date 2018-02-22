@@ -5,13 +5,14 @@ import json
 import requests
 
 PROFILES_URL = "https://api.mojang.com/profiles/minecraft"
-STREAM_WHITELIST_URL = "https://whitelist.twitchapps.com/list.php?id=YOUR_ID_HERE&format=json"
+STREAM_WHITELIST_URL = "https://whitelist.twitchapps.com/list.php?id=warths5657829972d9b&format=json"
 WHITELIST_FILE = "whitelist.json"
 ALL_OPS = True  # If True, Every whitelisted player will be OP. May be useful for Creative Servers.
 OPS_FILE = "ops.json"
 OPS_PERMISSION_LEVEL = 2
 OPS_BYPASSES_PLAYER_LIMIT = False
 LEVEL_4_OP_NAME = ["Player1", "Player2", "Player3"]
+EXCLUDED_OPS = ["Player4"]
 
 def _post(url, body, head):
     response = requests.post(url, data=body, headers=head)
@@ -60,16 +61,29 @@ if __name__ == '__main__':
                         break
                     else:
                         Player_Is_OP_LVL4 = False
+                for operator in EXCLUDED_OPS:
+                    if operator == player['name']:
+                        Player_Is_EXCLUDED = True
+                        break
+                    else:
+                        Player_Is_EXCLUDED = False
                 if Player_Is_OP_LVL4:
                     ops_block = {'uuid': full_uuid,
                                  'name': player['name'],
                                  'level': 4,
                                  'bypassesPlayerLimit': True}
                 else:
-                    ops_block = {'uuid': full_uuid,
-                                 'name': player['name'],
-                                 'level': OPS_PERMISSION_LEVEL,
-                                 'bypassesPlayerLimit': OPS_BYPASSES_PLAYER_LIMIT}
+                    if Player_Is_EXCLUDED:
+                        ops_block = {'uuid': full_uuid,
+                                     'name': player['name'],
+                                     'level': 0,
+                                     'bypassesPlayerLimit': False}
+                    else:
+                        ops_block = {'uuid': full_uuid,
+                                     'name': player['name'],
+                                     'level': OPS_PERMISSION_LEVEL,
+                                     'bypassesPlayerLimit': OPS_BYPASSES_PLAYER_LIMIT}
+
                 ops.append(ops_block)
         ops = json.dumps(ops, indent=4)
         whitelist = json.dumps(whitelist, indent=4)
