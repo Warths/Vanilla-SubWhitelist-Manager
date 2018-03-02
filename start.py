@@ -11,7 +11,7 @@ STREAM_WHITELIST_URL = "https://whitelist.twitchapps.com/list.php?id=warths56578
 WHITELIST_FILE = "whitelist.json"
 OPS_FILE = "ops.json"
 ALL_OPS = True  # If True, Every whitelisted player will be OP. May be useful for Creative Servers.
-OPS_PERMISSION_LEVEL = 2
+OPS_PERMISSION_LEVEL = 2 # AS
 OPS_BYPASSES_PLAYER_LIMIT = False
 LEVEL_4_OP_NAME = ["Warths", "Guerrierra", "Everynight_MC"]
 EXCLUDED_OPS = ["MyTheValentinus"]
@@ -56,7 +56,7 @@ def stop_server():
 
 def run_minecraft_cmd(string):
     string = string.replace('"', '\\"')
-    run_cmd('screen -p 0 -S %s -X stuff "%s $(printf \\\r' % (SCREEN_NAME, string))
+    run_cmd('screen -S %s -X stuff "%s^M"' % (SCREEN_NAME, string))
 
 
 if __name__ == '__main__':
@@ -68,46 +68,38 @@ if __name__ == '__main__':
         names = []
         for name in result:
             names.append(result[name]['whitelist_name'])
-
         list_player = find_profiles_by_names(names)
         whitelist = []
-        ops = []
-
         for player in list_player:
             full_uuid = format_uuid(player['id'])
             whitelist_block = {'uuid': full_uuid, 'name': player['name']}
             whitelist.append(whitelist_block)
-            ops_block = {'uuid': full_uuid,
-                         'name': player['name'],
-                         'level': 4 if player['name'] in LEVEL_4_OP_NAME else
-                                  0 if player['name'] in EXCLUDED_OPS else
-                                  2,
-                         'bypassesPlayerLimit': True if player['name'] in LEVEL_4_OP_NAME else
-                                                True if OPS_BYPASSES_PLAYER_LIMIT else False}
-            ops.append(ops_block)
-        ops = json.dumps(ops, indent=4)
-
-        with open(OPS_FILE, 'r') as oldOpList:
-            oldOpList = json.dumps(json.load(oldOpList), indent=4)
-            print(oldOpList)
-            if oldOpList == ops:
-                print("Liste des OPs non-modifiée.")
-            else:
-                print("Liste des OPs modifiée !")
-                stop_server()
         whitelist = json.dumps(whitelist, indent=4)
-
-        if ALL_OPS:
-            try:
-                with open(OPS_FILE, 'w') as Opslist:
-                    Opslist.write(ops)
-                    Opslist.close()
-            except:
-                print("Error when writing OP list file")
-
         try:
             with open(WHITELIST_FILE, 'w') as Whitelist:
                 Whitelist.write(whitelist)
                 Whitelist.close()
         except:
             print("Error when writing whitelist file")
+        if ALL_OPS:
+            with open(OPS_FILE, 'r') as file:
+                ops_json = json.load(file)
+            with open(WHITELIST_FILE, 'r') as file:
+                whitelist_json = json.load(file)
+            for op_player in ops_json:
+                if op_player['uuid'] in whitelist:
+                    if op_player['name'] in EXCLUDED_OPS:
+                        run_minecraft_cmd("deop %s" % (op_player['name']))
+                else:
+                    run_minecraft_cmd("op %s" % (op_player['name']))
+            ops_json = json.dumps(ops_json, indent=4)
+            for whitelisted_player in whitelist_json:
+                if whitelisted_player['uuid'] in ops_json:
+                    if whitelisted_player['name'] in EXCLUDED_OPS:
+                        run_minecraft_cmd("deop %s" % (whitelisted_player['name']))
+                elif whitelisted_player['name'] not in EXCLUDED_OPS:
+                        run_minecraft_cmd("op %s" % (whitelisted_player['name']))
+
+
+
+
