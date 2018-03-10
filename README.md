@@ -1,3 +1,3 @@
-## Stream Whitelist to Minecraft Whitelist
+## Stream to Minecraft Whitelist
 
-This script transform your stream whitelist people to minecraft whitelist.json
+Python script that manages whitelist and OP rights for Minecraft subscribers servers
